@@ -1,5 +1,13 @@
 package ipctransitrouter
 
+//totally totally look at this:
+//https://godoc.org/github.com/stretchr/stew/objects
+//up vote
+//OR you can use objects.Map from our stew package, it gives you dot accessors for maps:
+//
+//objects.Map(data).Get("service.auth.token")
+//see http://godoc.org/github.com/stretchr/stew/objects
+//via http://stackoverflow.com/questions/17056044/golang-quickly-access-data-of-maps-within-maps
 import (
 	"github.com/kr/pretty"
 	"github.com/stretchr/testify/assert"
