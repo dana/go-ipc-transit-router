@@ -6,6 +6,10 @@ import (
 	"testing"
 )
 
+//See tests of the reference implementation:
+//https://github.com/dana/perl-IPC-Transit-Router/blob/master/t/basic.t
+//https://github.com/dana/perl-Message-Router/blob/master/t/basic.t
+//https://github.com/dana/perl-Message-Router/blob/master/t/hash_of_routes.t
 //func Route(sendMessage map[string]interface{}, config map[string]interface{}) error {
 func TestBasic(t *testing.T) {
 	assert := assert.New(t)
