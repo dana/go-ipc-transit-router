@@ -24,8 +24,20 @@ func TestBasic(t *testing.T) {
 	message := map[string]interface{}{
 		"a": "b",
 	}
+	f1 := map[string]interface{}{
+		"qname": "test",
+	}
+	r1 := map[string]interface{}{
+		"match": map[string]interface{}{
+			"a": "b",
+		},
+		"transform": map[string]interface{}{
+			"x": "y",
+		},
+		"forwards": []interface{}{f1},
+	}
 	config := map[string]interface{}{
-		"routes": []interface{}{"hi", "there"},
+		"routes": []interface{}{r1},
 	}
 	err := Route(message, config)
 	assert.Nil(err)
