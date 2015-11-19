@@ -9,6 +9,7 @@ package ipctransitrouter
 //see http://godoc.org/github.com/stretchr/stew/objects
 //via http://stackoverflow.com/questions/17056044/golang-quickly-access-data-of-maps-within-maps
 import (
+	"github.com/dana/go-ipc-transit"
 	"github.com/kr/pretty"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -19,13 +20,15 @@ import (
 //https://github.com/dana/perl-Message-Router/blob/master/t/basic.t
 //https://github.com/dana/perl-Message-Router/blob/master/t/hash_of_routes.t
 //func Route(sendMessage map[string]interface{}, config map[string]interface{}) error {
+var Test_qname string = "ipc-transit-test-queue"
+
 func TestBasic(t *testing.T) {
 	assert := assert.New(t)
 	message := map[string]interface{}{
 		"a": "b",
 	}
 	f1 := map[string]interface{}{
-		"qname": "test",
+		"qname": Test_qname,
 	}
 	r1 := map[string]interface{}{
 		"match": map[string]interface{}{
@@ -41,6 +44,13 @@ func TestBasic(t *testing.T) {
 	}
 	err := Route(message, config)
 	assert.Nil(err)
+	recv, receiveErr := ipctransit.Receive(Test_qname)
+	assert.Nil(receiveErr)
+	assert.NotNil(recv)
+	assert.NotNil(recv.(map[string]interface{})["x"])
+	assert.NotNil(recv.(map[string]interface{})["a"])
+	assert.Equal(recv.(map[string]interface{})["a"], "b")
+	assert.Equal(recv.(map[string]interface{})["x"], "y")
 }
 
 func routeTestNo() {

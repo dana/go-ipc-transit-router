@@ -1,6 +1,7 @@
 package ipctransitrouter
 
 import (
+	"github.com/dana/go-ipc-transit"
 	"github.com/dana/go-message-match"
 	"github.com/dana/go-message-transform"
 	"github.com/kr/pretty"
@@ -15,10 +16,18 @@ func (e TransitRouterError) Error() string {
 }
 
 func doForward(sendMessage map[string]interface{}, forward map[string]interface{}) error {
+	if _, ok := forward["qname"]; !ok {
+		return TransitRouterError{"missing required field qname in forward"}
+	}
+	//TODO need to validate the type of qname here
+	qname := forward["qname"].(string)
+	sendErr := ipctransit.Send(sendMessage, qname)
+	if sendErr != nil {
+		return TransitRouterError{"sendErr"}
+	}
 	return nil
 }
 func doRoute(sendMessage map[string]interface{}, route map[string]interface{}) (bool, error) {
-	//	pretty.Println(route)
 	if _, ok := route["match"]; !ok {
 		return false, TransitRouterError{"'match' attribute required in each route"}
 	}
@@ -44,13 +53,12 @@ func doRoute(sendMessage map[string]interface{}, route map[string]interface{}) (
 		}
 	}
 	for _, forward := range forwards {
+		//TODO need to validate the type of forward here
 		forwardErr := doForward(sendMessage, forward.(map[string]interface{}))
 		if forwardErr != nil {
 			return false, TransitRouterError{"forwardErr"}
 		}
 	}
-	//	pretty.Println(sendMessage, forwards)
-	//	pretty.Println(doesMatch, matchErr)
 	return false, nil
 }
 
