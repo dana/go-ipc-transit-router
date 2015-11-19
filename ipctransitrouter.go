@@ -1,6 +1,8 @@
 package ipctransitrouter
 
 import (
+	"github.com/dana/go-message-match"
+	"github.com/dana/go-message-transform"
 	"github.com/kr/pretty"
 )
 
@@ -12,8 +14,43 @@ func (e TransitRouterError) Error() string {
 	return pretty.Sprintf("%v", e.What)
 }
 
+func doForward(sendMessage map[string]interface{}, forward map[string]interface{}) error {
+	return nil
+}
 func doRoute(sendMessage map[string]interface{}, route map[string]interface{}) (bool, error) {
-	pretty.Println(route)
+	//	pretty.Println(route)
+	if _, ok := route["match"]; !ok {
+		return false, TransitRouterError{"'match' attribute required in each route"}
+	}
+	//TODO need to validate the type of match here
+	match := route["match"].(map[string]interface{})
+	doesMatch, matchErr := messagematch.Match(sendMessage, match)
+	if matchErr != nil {
+		return false, TransitRouterError{"matchErr"}
+	}
+	if !doesMatch {
+		return false, nil
+	}
+	if _, ok := route["forwards"]; !ok {
+		return false, nil
+	}
+	//TODO need to validate the type of forwards here
+	forwards := route["forwards"].([]interface{})
+	if _, ok := route["transform"]; ok {
+		//TODO need to validate the type of transform here
+		transformErr := messagetransform.Transform(&sendMessage, route["transform"].(map[string]interface{}))
+		if transformErr != nil {
+			return false, TransitRouterError{"transformErr"}
+		}
+	}
+	for _, forward := range forwards {
+		forwardErr := doForward(sendMessage, forward.(map[string]interface{}))
+		if forwardErr != nil {
+			return false, TransitRouterError{"forwardErr"}
+		}
+	}
+	//	pretty.Println(sendMessage, forwards)
+	//	pretty.Println(doesMatch, matchErr)
 	return false, nil
 }
 
@@ -36,7 +73,6 @@ func Route(sendMessage map[string]interface{}, config map[string]interface{}) er
 			if doShortCircuit {
 				break
 			}
-			pretty.Println(doShortCircuit)
 		}
 	case map[string]interface{}:
 		panic("map routes type unimplemented")
